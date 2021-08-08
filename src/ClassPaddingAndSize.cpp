@@ -1,51 +1,41 @@
 #include "gtest/gtest.h"
-#include <bitset>
 #include <tuple>
-#include <cxxabi.h>
-#include <type_traits>
+#ifndef NDEBUG
+#include "utils.h"
+#endif
 
-std::string demangleClassName(auto v)
+TEST(ClassPaddingAndSize, char_and_short_aligned_to_4bytes)
 {
-    int status = -4; /* Some magic for ABI */
-
-    std::unique_ptr<char, void (*)(void *)> res{
-        abi::__cxa_demangle(typeid(v).name(), NULL, NULL, &status),
-        std::free};
-    return (status == 0) ? res.get() : typeid(v).name();
+    std::tuple<char, short int> tup('a', 1);
+#ifndef NDEBUG
+    printTupleInfo(tup);
+#endif
+    ASSERT_EQ(sizeof(tup), 4);
 }
 
-void show(auto v)
+TEST(ClassPaddingAndSize, short_and_char_and_int_aligned_to_8bytes)
 {
-    std::string name = demangleClassName(v);
-    if (std::is_pod<decltype(v)>::value)
-    {
-        std::cout << "   [t = " << name << "]" << '\n'
-                  << "      sizeof = " << sizeof(v) << '\n'
-                  << "      value = " << v << '\n';
-    }
-    else
-    {
-        std::cout << "   [t = " << name << "]" << '\n'
-                  << "      sizeof = " << sizeof(v) << '\n';
-    }
+    std::tuple<short int, char, int> tup(1, 'a', 1);
+#ifndef NDEBUG
+    printTupleInfo(tup);
+#endif
+    ASSERT_EQ(sizeof(tup), 8);
 }
 
-void printClassInfo(const auto &v)
+TEST(ClassPaddingAndSize, char_and_double_and_int_aligned_to_24bytes)
 {
-    std::string name = demangleClassName(v);
-    std::cout << "[T = " << name << "]" << '\n'
-              << "   sizeof = " << sizeof(v) << '\n'
-              << "   alignment_of = " << std::alignment_of<decltype(v)>::value << '\n';
-    std::apply([](auto &&...args)
-               { ((show(args)), ...); },
-               v);
-    std::cout << '\n';
+    std::tuple<char, double, int> tup(1, 1.2, 1);
+#ifndef NDEBUG
+    printTupleInfo(tup);
+#endif
+    ASSERT_EQ(sizeof(tup), 3 * 8);
 }
 
-TEST(ClassPaddingAndSize, testik)
+TEST(ClassPaddingAndSize, double_and_int_and_char_aligned_to_16bytes)
 {
-    printClassInfo(std::tuple<char, short int>('a', 1));
-    printClassInfo(std::tuple<short int, char, int>(1, 'a', 1));
-    printClassInfo(std::tuple<char, double, int>(1, 1.2, 1));
-    printClassInfo(std::tuple<double, int, char>(1.2, 1, 'a'));
+    std::tuple<double, int, char> tup(1.2, 1, 'a');
+#ifndef NDEBUG
+    printTupleInfo(tup);
+#endif
+    ASSERT_EQ(sizeof(tup), 2 * 8);
 }
