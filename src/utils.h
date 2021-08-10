@@ -10,7 +10,7 @@ std::string demangleClassName(auto v)
 {
     int status = -4; /* Some magic for ABI */
 
-    std::unique_ptr<char, void (*)(void *)> res{
+    std::unique_ptr<char, decltype(&std::free)> res{
 #ifndef _MSC_VER
         abi::__cxa_demangle(typeid(v).name(), NULL, NULL, &status),
 #else
