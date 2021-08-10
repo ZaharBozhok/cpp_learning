@@ -23,7 +23,7 @@ std::string demangleClassName(auto v)
 void show(auto v)
 {
     std::string name = demangleClassName(v);
-    if (std::is_pod<decltype(v)>::value)
+    if (std::is_trivial_v<decltype(v)>)
     {
         std::cout << "   [t = " << name << "]" << '\n'
                   << "      sizeof = " << sizeof(v) << '\n'
