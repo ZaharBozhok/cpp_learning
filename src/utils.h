@@ -1,4 +1,6 @@
+#ifndef _MSC_VER
 #include <cxxabi.h>
+#endif
 #include <type_traits>
 #include <tuple>
 #include <string>
@@ -9,7 +11,11 @@ std::string demangleClassName(auto v)
     int status = -4; /* Some magic for ABI */
 
     std::unique_ptr<char, void (*)(void *)> res{
+#ifndef _MSC_VER
         abi::__cxa_demangle(typeid(v).name(), NULL, NULL, &status),
+#else
+        nullptr,
+#endif
         std::free};
     return (status == 0) ? res.get() : typeid(v).name();
 }
